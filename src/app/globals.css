@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  @apply bg-paper text-ink antialiased;
+  font-feature-settings: "tnum" 1;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+::selection {
+  background: #cfe3d6;
+}
+
+:focus-visible {
+  outline: 2px solid #1e4d3a;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex min-h-[48px] select-none items-center justify-center gap-2 rounded-xl px-5 text-[15px] font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-pine text-white hover:bg-pine-dark active:bg-pine-dark;
+  }
+  .btn-secondary {
+    @apply border border-line-strong bg-white text-ink hover:bg-pine-soft;
+  }
+  .btn-ghost {
+    @apply text-ink-2 hover:bg-black/5;
+  }
+  .btn-danger {
+    @apply border border-chilli/30 bg-chilli-soft text-chilli hover:bg-[#f6d9d4];
+  }
+  .btn-sm {
+    @apply min-h-[40px] rounded-lg px-3 text-sm;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-card shadow-soft;
+  }
+  .field {
+    @apply min-h-[48px] w-full rounded-xl border border-line-strong bg-white px-4 text-[16px] text-ink placeholder:text-ink-3 focus:border-pine focus:outline-none focus:ring-2 focus:ring-pine/20;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold leading-none;
+  }
+  .skeleton {
+    @apply animate-shimmer rounded-xl bg-[linear-gradient(90deg,#e9ece6_25%,#f4f6f1_50%,#e9ece6_75%)] bg-[length:200%_100%];
+  }
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+}

@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  RETAILER
+  DESK
+}
+
+enum SchemeType {
+  FREE_GOODS
+  SLAB_PERCENT
+}
+
+enum OrderStatus {
+  PLACED
+  CREDIT_HOLD
+  CONFIRMED
+  REJECTED
+  EXPORTED
+}
+
+enum OrderSource {
+  APP
+  AI
+}
+
+model Retailer {
+  id               String          @id @default(cuid())
+  name             String
+  creditLimitPaise Int
+  outstandingPaise Int             @default(0)
+  users            User[]
+  prices           RetailerPrice[]
+  orders           Order[]
+  aliases          Alias[]
+  captures         Capture[]
+}
+
+model User {
+  id         String    @id @default(cuid())
+  phone      String    @unique
+  role       Role
+  retailerId String?
+  retailer   Retailer? @relation(fields: [retailerId], references: [id])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([phone, createdAt])
+}
+
+model Sku {
+  id            String          @id @default(cuid())
+  code          String          @unique
+  name          String
+  nameHi        String?
+  piecesPerCase Int
+  stockCases    Int
+  active        Boolean         @default(true)
+  prices        RetailerPrice[]
+  schemes       Scheme[]
+  lines         OrderLine[]
+  aliases       Alias[]
+}
+
+// Price is per piece, in paise (assumption A1).
+model RetailerPrice {
+  id              String   @id @default(cuid())
+  retailerId      String
+  skuId           String
+  piecePricePaise Int
+  retailer        Retailer @relation(fields: [retailerId], references: [id])
+  sku             Sku      @relation(fields: [skuId], references: [id])
+
+  @@unique([retailerId, skuId])
+}
+
+// Percentages are stored in basis points (3% = 300) to avoid floats.
+model Scheme {
+  id        String     @id @default(cuid())
+  skuId     String
+  type      SchemeType
+  buyCases  Int?
+  freeCases Int?
+  minCases  Int?
+  percentBp Int?
+  active    Boolean    @default(true)
+  sku       Sku        @relation(fields: [skuId], references: [id])
+}
+
+model Capture {
+  id         String   @id @default(cuid())
+  retailerId String
+  rawText    String
+  resultJson Json
+  createdAt  DateTime @default(now())
+  retailer   Retailer @relation(fields: [retailerId], references: [id])
+  orders     Order[]
+}
+
+model Order {
+  id            String       @id @default(cuid())
+  seq           Int          @unique @default(autoincrement())
+  retailerId    String
+  source        OrderSource
+  status        OrderStatus
+  subtotalPaise Int
+  discountPaise Int
+  totalPaise    Int
+  note          String?
+  captureId     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  retailer      Retailer     @relation(fields: [retailerId], references: [id])
+  capture       Capture?     @relation(fields: [captureId], references: [id])
+  lines         OrderLine[]
+  events        OrderEvent[]
+
+  @@index([retailerId, createdAt])
+  @@index([status, createdAt])
+}
+
+model OrderLine {
+  id              String  @id @default(cuid())
+  orderId         String
+  skuId           String
+  qtyCases        Int
+  freeCases       Int     @default(0)
+  piecePricePaise Int
+  discountPaise   Int     @default(0)
+  lineTotalPaise  Int
+  originalText    String?
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sku             Sku     @relation(fields: [skuId], references: [id])
+
+  @@index([orderId])
+}
+
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  actorId   String
+  action    String
+  note      String?
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Alias {
+  id         String   @id @default(cuid())
+  retailerId String
+  phrase     String
+  skuId      String
+  retailer   Retailer @relation(fields: [retailerId], references: [id])
+  sku        Sku      @relation(fields: [skuId], references: [id])
+
+  @@unique([retailerId, phrase])
+}
