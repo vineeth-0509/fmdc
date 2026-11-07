@@ -1,19 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart";
 import { Stepper } from "@/components/controls";
-import { IconAlert, IconCheck, IconSpark } from "@/components/icons";
+import { IconAlert, IconCamera, IconCheck, IconImage, IconSpark } from "@/components/icons";
 import { useLang, useSkuName } from "@/components/lang";
 import { ProductArt } from "@/components/ProductArt";
 import { Button, Chip, ErrorNote, Notice, Skeleton, cx } from "@/components/ui";
 import type { CaptureLine, CaptureResult, Confidence, SkuOption } from "@/lib/capture-types";
 import type { DictKey } from "@/lib/i18n";
+import { shrinkImage } from "@/lib/shrink-image";
 
 const SAMPLE = "bhaiya 5 peti biscuit chhota, 2 peti washing powder 1 kilo, chai patti 250 wala 1 peti";
 
 type LineState = { chosenId: string | null; qty: number; unitOk: boolean; removed: boolean };
+type Photo = { base64: string; url: string };
 
 const CONF: Record<Confidence, { key: DictKey; tone: "pine" | "turmeric" | "chilli" | "neutral" }> = {
   HIGH: { key: "confHigh", tone: "pine" },
@@ -22,32 +24,42 @@ const CONF: Record<Confidence, { key: DictKey; tone: "pine" | "turmeric" | "chil
   NONE: { key: "confNone", tone: "neutral" },
 };
 
-export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
+export function CaptureView({ catalogue, aiOn }: { catalogue: SkuOption[]; aiOn: boolean }) {
   const router = useRouter();
   const { t } = useLang();
   const skuName = useSkuName();
   const { addMany } = useCart();
 
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [photo, setPhoto] = useState<Photo | null>(null);
+  const [loading, setLoading] = useState<"text" | "photo" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CaptureResult | null>(null);
   const [state, setState] = useState<Record<string, LineState>>({});
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const uploadRef = useRef<HTMLInputElement>(null);
 
   const byId = new Map(catalogue.map((s) => [s.id, s]));
 
-  async function read() {
+  // Free the preview image when it is replaced or the screen closes.
+  useEffect(() => {
+    return () => {
+      if (photo) URL.revokeObjectURL(photo.url);
+    };
+  }, [photo]);
+
+  async function run(kind: "text" | "photo", body: unknown) {
     setError(null);
-    setLoading(true);
+    setLoading(kind);
     setResult(null);
     try {
       const res = await fetch("/api/ai/parse-order", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error?.message ?? "Could not read your message.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error?.message ?? "Could not read your order.");
       const r = data as CaptureResult;
       setResult(r);
       setState(
@@ -59,9 +71,26 @@ export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
         ),
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not read your message.");
+      setError(e instanceof Error ? e.message : "Could not read your order.");
     } finally {
-      setLoading(false);
+      setLoading(null);
+    }
+  }
+
+  const readText = () => run("text", { text });
+  const readPhoto = () => {
+    if (photo) run("photo", { image: photo.base64 });
+  };
+
+  async function onPick(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    try {
+      const shrunk = await shrinkImage(file);
+      setPhoto(shrunk);
+      setResult(null);
+    } catch {
+      setError(t("photoBad"));
     }
   }
 
@@ -89,7 +118,12 @@ export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="text-xl font-semibold">{t("captureTitle")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-semibold">{t("captureTitle")}</h1>
+        <Chip tone={aiOn ? "pine" : "neutral"}>
+          <IconSpark width={14} height={14} /> {aiOn ? t("aiOn") : t("aiOff")}
+        </Chip>
+      </div>
       <p className="mt-1 text-sm text-ink-2">{t("captureHelp")}</p>
 
       <textarea
@@ -101,18 +135,74 @@ export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
         onChange={(e) => setText(e.target.value)}
       />
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button onClick={read} loading={loading} disabled={text.trim().length < 2} className="flex-1 sm:flex-none">
+        <Button onClick={readText} loading={loading === "text"} disabled={text.trim().length < 2 || loading !== null} className="flex-1 sm:flex-none">
           <IconSpark width={18} height={18} />
-          {loading ? t("captureReading") : t("captureRead")}
+          {loading === "text" ? t("captureReading") : t("captureRead")}
         </Button>
-        <Button variant="secondary" onClick={() => setText(SAMPLE)} disabled={loading}>
+        <Button variant="secondary" onClick={() => setText(SAMPLE)} disabled={loading !== null}>
           {t("captureSample")}
         </Button>
       </div>
 
+      <div className="card mt-5 p-4">
+        <p className="text-sm font-semibold">{t("photoTitle")}</p>
+        <p className="mt-0.5 text-xs text-ink-3">{t("photoHint")}</p>
+
+        {/* "capture" opens the phone camera. On a computer it opens the file picker instead. */}
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          tabIndex={-1}
+          onChange={(e) => {
+            onPick(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={uploadRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/*"
+          className="sr-only"
+          tabIndex={-1}
+          onChange={(e) => {
+            onPick(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Button variant="secondary" onClick={() => cameraRef.current?.click()} disabled={!aiOn || loading !== null}>
+            <IconCamera width={18} height={18} /> {t("takePhoto")}
+          </Button>
+          <Button variant="secondary" onClick={() => uploadRef.current?.click()} disabled={!aiOn || loading !== null}>
+            <IconImage width={18} height={18} /> {t("uploadPhoto")}
+          </Button>
+        </div>
+        {!aiOn && <p className="mt-2 text-xs text-amber">{t("photoNeedsAi")}</p>}
+
+        {photo && (
+          <div className="mt-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo.url} alt="Your order list" className="max-h-72 w-full rounded-xl border border-line bg-paper object-contain" />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button onClick={readPhoto} loading={loading === "photo"} disabled={loading !== null} className="flex-1 sm:flex-none">
+                <IconSpark width={18} height={18} />
+                {loading === "photo" ? t("photoReading") : t("readPhoto")}
+              </Button>
+              <Button variant="ghost" onClick={() => setPhoto(null)} disabled={loading !== null}>
+                {t("remove")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {error && (
         <div className="mt-4">
-          <ErrorNote message={error} onRetry={read} retryLabel={t("tryAgain")} />
+          <ErrorNote message={error} onRetry={photo && loading === null && !text.trim() ? readPhoto : text.trim().length >= 2 ? readText : undefined} retryLabel={t("tryAgain")} />
         </div>
       )}
 
@@ -156,7 +246,7 @@ export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
                   </div>
 
                   <div className="mt-3 flex items-center gap-3 rounded-xl bg-paper p-2.5">
-                    {sku ? <ProductArt code={sku.code} size={52} /> : <div className="h-[52px] w-[52px] rounded-2xl bg-black/5" />}
+                    {sku ? <ProductArt code={sku.code} name={sku.name} size={52} /> : <div className="h-[52px] w-[52px] rounded-2xl bg-black/5" />}
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-ink-3">{t("matchedTo")}</p>
                       <p className="text-[15px] font-semibold leading-snug">{sku ? skuName(sku) : t("pickProduct")}</p>
@@ -231,11 +321,7 @@ export function CaptureView({ catalogue }: { catalogue: SkuOption[] }) {
                               {t("yesCases", { n: st.qty })}
                             </Button>
                             {suggested && sku && (
-                              <Button
-                                small
-                                variant="secondary"
-                                onClick={() => patch(line.id, { unitOk: true, qty: suggested })}
-                              >
+                              <Button small variant="secondary" onClick={() => patch(line.id, { unitOk: true, qty: suggested })}>
                                 {t("yesSuggested", { n: suggested, p: suggested * sku.piecesPerCase })}
                               </Button>
                             )}

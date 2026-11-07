@@ -5,14 +5,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "#F5F6F2",
+        paper: "#F2F6F3",
         card: "#FFFFFF",
-        ink: { DEFAULT: "#17201B", 2: "#55615A", 3: "#8A948E" },
-        line: { DEFAULT: "#E3E7E0", strong: "#CBD2C9" },
-        pine: { DEFAULT: "#1E4D3A", dark: "#143628", soft: "#E4EFE8" },
-        turmeric: { DEFAULT: "#B7791F", soft: "#FBF0D9" },
-        chilli: { DEFAULT: "#B23A2B", soft: "#FBE9E6" },
-        amber: { soft: "#FFF4DB", DEFAULT: "#9A6A0A" },
+        ink: { DEFAULT: "#13201A", 2: "#4B5A52", 3: "#7E8C84" },
+        line: { DEFAULT: "#E1E9E4", strong: "#C6D3CB" },
+        pine: { DEFAULT: "#0F6B4A", dark: "#0A4F37", soft: "#DDF3E8" },
+        turmeric: { DEFAULT: "#D97706", soft: "#FFF0D6" },
+        chilli: { DEFAULT: "#C0392B", soft: "#FDEBE7" },
+        amber: { soft: "#FFF4DB", DEFAULT: "#92580A" },
       },
       fontFamily: { sans: ["var(--font-hind)", "system-ui", "sans-serif"] },
       boxShadow: {

@@ -105,7 +105,7 @@ function LineEditor({
   return (
     <li className="card p-4">
       <div className="flex gap-3">
-        <ProductArt code={line.code} size={56} />
+        <ProductArt code={line.code} name={line.name} size={56} />
         <div className="min-w-0 flex-1">
           {line.originalText && (
             <p className="mb-1 text-xs text-ink-3">

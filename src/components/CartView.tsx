@@ -115,7 +115,7 @@ export function CartView() {
           return (
             <li key={item.skuId} className="card p-3">
               <div className="flex gap-3">
-                <ProductArt code={line?.code ?? ""} size={64} />
+                <ProductArt code={line?.code ?? ""} name={line?.name} size={64} />
                 <div className="min-w-0 flex-1">
                   {line ? (
                     <>

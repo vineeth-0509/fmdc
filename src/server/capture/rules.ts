@@ -41,6 +41,8 @@ const CATEGORY_WORDS: Record<string, string[]> = {
 const DEVANAGARI: [string, string][] = [
   ["पेटी", "peti"], ["बिस्किट", "biscuit"], ["बिस्कुट", "biscuit"], ["चाय", "chai"],
   ["पत्ती", "patti"], ["साबुन", "soap"], ["नमकीन", "namkeen"], ["सर्फ", "surf"],
+  ["वाशिंग", "washing"], ["पाउडर", "powder"], ["डिटर्जेंट", "detergent"], ["डिटरजेंट", "detergent"],
+  ["किलो", "kilo"], ["ग्राम", "gram"], ["केस", "case"],
 ];
 
 export function normalize(input: string): string {

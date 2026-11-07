@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth/session";
 import { getCatalogue } from "@/server/catalogue";
 import { CaptureView } from "@/components/CaptureView";
+import { aiConfigured } from "@/server/capture/service";
 import type { SkuOption } from "@/lib/capture-types";
 
 export const metadata = { title: "Order by message" };
@@ -16,5 +17,6 @@ export default async function CapturePage() {
     stockCases: i.stockCases,
     piecesPerCase: i.piecesPerCase,
   }));
-  return <CaptureView catalogue={options} />;
+  const aiOn = aiConfigured();
+  return <CaptureView catalogue={options} aiOn={aiOn} />;
 }

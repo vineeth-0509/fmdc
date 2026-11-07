@@ -58,3 +58,14 @@ export const IconRepeat = (p: SVGProps<SVGSVGElement>) => (
 export const IconSpark = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /></svg>
 );
+
+export const IconCamera = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z" /><circle cx="12" cy="13" r="3.6" /></svg>
+);
+export const IconImage = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.5" /><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5" /></svg>
+);
+
+export const IconSheet = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M4 10h16M4 15h16M10 4v16" /></svg>
+);

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { SchemeInputError } from "@/server/schemes/engine";
@@ -32,6 +33,12 @@ function assertSameOrigin(req: Request) {
   }
 }
 
+/** Connection problems (for example a sleeping free-tier database), not mistakes in the request. */
+function isDatabaseDown(e: unknown): boolean {
+  if (e instanceof Prisma.PrismaClientInitializationError) return true;
+  return e instanceof Prisma.PrismaClientKnownRequestError && ["P1001", "P1002", "P1008", "P1017"].includes(e.code);
+}
+
 export async function route(req: Request, handler: () => Promise<Response>): Promise<Response> {
   try {
     assertSameOrigin(req);
@@ -44,6 +51,10 @@ export async function route(req: Request, handler: () => Promise<Response>): Pro
       return fail(400, "INVALID_INPUT", `${where}${first?.message ?? "Invalid input."}`);
     }
     if (e instanceof SchemeInputError) return fail(400, "INVALID_INPUT", e.message);
+    if (isDatabaseDown(e)) {
+      console.error("Database unreachable:", e);
+      return fail(503, "DB_UNAVAILABLE", "The database is waking up or unreachable. Wait a few seconds and try again.");
+    }
     console.error("Unhandled API error:", e);
     return fail(500, "SERVER_ERROR", "Something went wrong on our side. Please try again.");
   }

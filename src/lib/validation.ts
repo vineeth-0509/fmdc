@@ -26,6 +26,16 @@ export const captureSchema = z.object({
   text: z.string().trim().min(2, "Type or paste your order first.").max(1000, "Please keep the message under 1000 characters."),
 });
 
+export const captureImageSchema = z.object({
+  image: z
+    .string()
+    .min(100, "The photo is empty.")
+    .max(2_800_000, "The photo is too large. Try again.")
+    .regex(/^[A-Za-z0-9+/]+={0,2}$/, "The photo data is not valid."),
+});
+
+export const captureBodySchema = z.union([captureSchema, captureImageSchema]);
+
 export const orderActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("confirm") }),
   z.object({ action: z.literal("reject"), reason: z.string().trim().min(3, "Give a short reason.").max(300) }),

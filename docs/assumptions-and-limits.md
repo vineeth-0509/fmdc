@@ -17,15 +17,17 @@ These are decisions the brief did not make for us. Each is also listed in the Te
 | A9 | The AI step uses an LLM API configured by environment variables. Without it, keyword matching is used. |
 | A10 | "peti" means case. "chhota" suggests the smaller pack; this is a hint, so it is shown as "Please check". |
 | A11 | The order desk is used on a laptop or desktop; it still works on a phone. |
+| A13 | The Reports screen (shops and period, as Excel or CSV) goes beyond the brief; it is extra depth. Periods count back from now (calendar months for 1, 3 and 6 months); custom dates use IST day boundaries; Rejected and awaiting orders are excluded unless ticked. |
 | A12 | The extra products, retailers, prices, credit limits and sample orders are invented. |
 
 ## What was left out (on purpose)
 
-Salesman role and offline mode, voice and photo capture, van loading lists, the 14-day no-order dashboard,
+Salesman role and offline mode, voice-note capture, van loading lists, the 14-day no-order dashboard,
 real SMS and WhatsApp, payments, delivery tracking and GST e-invoicing (the last three are out of scope in the brief).
 
 ## Known limits
 
+- Photo capture sends the (shrunk) image to Google AI to be read. The image is not stored; only the text that was read is kept. Handwriting can be misread, so every line is shown for the retailer to check. Without the AI key, photo reading is switched off.
 - Matching categories are derived from the SKU code format (`SKU-<CATEGORY>-<size>`), which suits this catalogue.
 - Order numbers are shown as `ORD-` plus 1000 and the database sequence.
 - Outstanding credit moves only when the desk confirms an order; two open orders can together pass the limit, and

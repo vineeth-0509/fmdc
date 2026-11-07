@@ -42,6 +42,27 @@ export function LoginForm({ demoHints }: { demoHints: boolean }) {
     }
   }
 
+  /** Reviewer shortcut: asks for a code and signs in with it, using the same two requests as the form. */
+  async function quickLogin(demoPhone: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const sent = await post("/api/auth/otp/send", { phone: demoPhone });
+      if (typeof sent.demoCode !== "string") {
+        setPhone(demoPhone);
+        setLoading(false);
+        setError("Quick access is switched off here. Use the number above with your code.");
+        return;
+      }
+      const data = await post("/api/auth/otp/verify", { phone: demoPhone, code: sent.demoCode });
+      router.replace(data.redirect);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not sign in.");
+      setLoading(false);
+    }
+  }
+
   async function verify(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -62,7 +83,7 @@ export function LoginForm({ demoHints }: { demoHints: boolean }) {
       <h2 className="text-2xl font-semibold tracking-tight">{step === "phone" ? "Sign in" : "Enter the code"}</h2>
       <p className="mt-1 text-sm text-ink-2">
         {step === "phone"
-          ? "Use the mobile number registered with Company A."
+          ? "Use the mobile number registered with your distributor."
           : `We sent a 6-digit code to ${phone.slice(0, 5)} ${phone.slice(5)}.`}
       </p>
 
@@ -129,16 +150,18 @@ export function LoginForm({ demoHints }: { demoHints: boolean }) {
       )}
 
       {demoHints && step === "phone" && (
-        <div className="mt-8 rounded-2xl border border-dashed border-line-strong p-4">
-          <p className="text-sm font-semibold">Demo accounts</p>
-          <div className="mt-3 grid gap-2">
-            <button type="button" className="btn btn-secondary btn-sm justify-between" onClick={() => setPhone("9000000001")}>
-              <span>Retailer · Sharma General Store</span>
-              <span className="tabular-nums text-ink-3">9000000001</span>
+        <div className="mt-8">
+          <div className="flex items-center gap-3 text-xs font-medium text-ink-3">
+            <span className="h-px flex-1 bg-line-strong" />
+            Reviewer access · sample data
+            <span className="h-px flex-1 bg-line-strong" />
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => quickLogin("9000000001")} disabled={loading}>
+              Continue as retailer
             </button>
-            <button type="button" className="btn btn-secondary btn-sm justify-between" onClick={() => setPhone("9000000099")}>
-              <span>Order desk</span>
-              <span className="tabular-nums text-ink-3">9000000099</span>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => quickLogin("9000000099")} disabled={loading}>
+              Continue as order desk
             </button>
           </div>
         </div>

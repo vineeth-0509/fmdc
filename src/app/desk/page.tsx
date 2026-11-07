@@ -5,6 +5,7 @@ import { STATUS_LABEL, formatDateTime, orderLabel } from "@/lib/format";
 import { formatINR } from "@/lib/money";
 import { IconList } from "@/components/icons";
 import { Chip, EmptyState, StatusChip, cx } from "@/components/ui";
+import { DeskRowActions } from "@/components/DeskRowActions";
 
 export const metadata = { title: "Orders" };
 
@@ -88,6 +89,7 @@ export default async function DeskPage({ searchParams }: { searchParams: Promise
                   <th className="px-4 py-3 text-right font-semibold">Items</th>
                   <th className="px-4 py-3 text-right font-semibold">Total</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 text-right font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -106,6 +108,9 @@ export default async function DeskPage({ searchParams }: { searchParams: Promise
                     <td className="px-4 py-3">
                       <StatusChip status={o.status} label={STATUS_LABEL[o.status]} />
                     </td>
+                    <td className="px-4 py-3">
+                      <DeskRowActions id={o.id} status={o.status} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -114,8 +119,8 @@ export default async function DeskPage({ searchParams }: { searchParams: Promise
 
           <ul className="mt-4 space-y-3 md:hidden">
             {orders.map((o) => (
-              <li key={o.id}>
-                <Link href={`/desk/orders/${o.id}`} className={cx("card block p-4", o.status === "CREDIT_HOLD" && "border-chilli/40")}>
+              <li key={o.id} className={cx("card p-4", o.status === "CREDIT_HOLD" && "border-chilli/40")}>
+                <Link href={`/desk/orders/${o.id}`} className="block">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-semibold tabular-nums">{orderLabel(o.seq)}</p>
@@ -131,6 +136,9 @@ export default async function DeskPage({ searchParams }: { searchParams: Promise
                     <p className="text-lg font-bold tabular-nums">{formatINR(o.totalPaise)}</p>
                   </div>
                 </Link>
+                <div className="mt-3 border-t border-line pt-3">
+                  <DeskRowActions id={o.id} status={o.status} />
+                </div>
               </li>
             ))}
           </ul>

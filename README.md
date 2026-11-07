@@ -23,7 +23,9 @@ src/
     pricing.ts         Prices a cart from server-side data; stock and credit rules
     orders.ts          Place, confirm, reject and correct orders (transactions, stock locks)
     capture/           Message matching: keyword rules, optional LLM step, validation
-    export/tally.ts    CSV builder
+    export/tally.ts    Tally CSV builder
+    export/xlsx.ts     Small Excel (.xlsx) writer with no extra packages
+    reports/           Period maths, report rows, summary and workbook for the Reports screen
 prisma/                Schema and seed data
 tests/                 Unit tests for the logic that matters most
 ```

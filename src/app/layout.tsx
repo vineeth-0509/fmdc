@@ -3,6 +3,7 @@ import { Hind } from "next/font/google";
 import "./globals.css";
 import { LangProvider } from "@/components/lang";
 import { SwRegister } from "@/components/SwRegister";
+import { BRAND } from "@/lib/brand";
 
 const hind = Hind({
   subsets: ["latin", "devanagari"],
@@ -12,7 +13,7 @@ const hind = Hind({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Company A Orders", template: "%s · Company A Orders" },
+  title: { default: BRAND, template: `%s · ${BRAND}` },
   description: "Order from your distributor in a minute: your prices, today's stock and schemes.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon-192.png" },
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1E4D3A",
+  themeColor: "#0F6B4A",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

@@ -73,3 +73,181 @@ body {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Login hero. One 12 s story loops. Product tiles use a 24 s timeline so that
+   two product sets can take turns (set B is delayed by 12 s).
+   --------------------------------------------------------------------------- */
+.hero-fade-up {
+  animation: heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-fade-up-2 {
+  animation: heroFadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-scene-wrap {
+  position: relative;
+  width: 100%;
+  height: 178px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-scene {
+  --cy: 122px;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 440px;
+  height: 320px;
+  margin-left: -220px;
+  transform: scale(0.55);
+  transform-origin: top center;
+}
+@media (min-width: 480px) {
+  .hero-scene-wrap { height: 232px; }
+  .hero-scene { transform: scale(0.72); }
+}
+@media (min-width: 768px) {
+  .hero-scene-wrap { height: 330px; }
+  .hero-scene { transform: scale(1); }
+}
+
+.hero-tile {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  border-radius: 18px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: heroTile 24s ease-in-out infinite both;
+}
+@keyframes heroTile {
+  0%   { opacity: 0; transform: translate(var(--sx), calc(var(--sy) + 26px)) scale(0.88); }
+  3%   { opacity: 1; transform: translate(var(--sx), var(--sy)) scale(1); }
+  9%   { transform: translate(var(--sx), calc(var(--sy) - 6px)) scale(1); }
+  15%  { transform: translate(var(--sx), var(--sy)) scale(1); }
+  21%  { transform: translate(var(--sx), calc(var(--sy) - 5px)) scale(1); }
+  27%  { transform: translate(var(--sx), var(--sy)) scale(1); opacity: 1; }
+  36%  { transform: translate(0, var(--cy)) scale(0.42); opacity: 0.95; }
+  39%  { transform: translate(0, var(--cy)) scale(0.3); opacity: 0; }
+  100% { transform: translate(0, var(--cy)) scale(0.3); opacity: 0; }
+}
+
+.hero-cart {
+  position: absolute;
+  left: 50%;
+  top: 78%;
+  margin: -48px 0 0 -52px;
+}
+.hero-cart-bob { animation: heroBob 3.2s ease-in-out infinite; }
+.hero-cart-pulse { animation: heroPulse 12s ease-in-out infinite; transform-origin: 50% 70%; }
+@keyframes heroBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes heroPulse {
+  0%, 60% { transform: scale(1); }
+  66% { transform: scale(1.1); }
+  72% { transform: scale(1); }
+  76% { transform: scale(1.07); }
+  82%, 100% { transform: scale(1); }
+}
+
+.hero-label {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  animation: heroLabel 12s ease-in-out infinite both;
+}
+.hero-label i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7be0b0;
+  box-shadow: 0 0 0 3px rgba(123, 224, 176, 0.25);
+}
+@keyframes heroLabel {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+  6%   { opacity: 1; transform: translateY(0) scale(1); }
+  26%  { opacity: 1; transform: translateY(-3px) scale(1); }
+  32%  { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  100% { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+@media (max-width: 767px) {
+  .hero-label-3 { display: none; }
+  .hero-label { font-size: 12px; padding: 6px 11px; }
+}
+
+.hero-confirm {
+  position: absolute;
+  left: 50%;
+  top: 27%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px 11px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0a4f37;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: heroConfirm 12s ease-in-out infinite both;
+}
+@keyframes heroConfirm {
+  0%, 78% { opacity: 0; transform: translate(-50%, -30%) scale(0.9); }
+  82% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  94% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  98%, 100% { opacity: 0; transform: translate(-50%, -62%) scale(0.98); }
+}
+.hero-check {
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  animation: heroCheck 12s ease-out infinite both;
+}
+@keyframes heroCheck {
+  0%, 82% { stroke-dashoffset: 22; }
+  89%, 100% { stroke-dashoffset: 0; }
+}
+
+/* Reduced motion: no movement. Show one calm, static picture instead. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-up,
+  .hero-fade-up-2,
+  .hero-tile,
+  .hero-cart-bob,
+  .hero-cart-pulse,
+  .hero-label,
+  .hero-confirm,
+  .hero-check {
+    animation: none !important;
+  }
+  .hero-tile-a { opacity: 1; transform: translate(var(--sx), var(--sy)); }
+  .hero-tile-b { display: none; }
+  .hero-label { opacity: 1; }
+  .hero-confirm { opacity: 1; transform: translate(-50%, -50%); }
+  .hero-check { stroke-dashoffset: 0; }
+}

@@ -7,6 +7,7 @@ import { useCart } from "@/components/cart";
 import { useLang } from "@/components/lang";
 import { IconBag, IconList, IconLogout, IconMessage, IconStore } from "@/components/icons";
 import { cx } from "@/components/ui";
+import { BRAND } from "@/lib/brand";
 import type { DictKey } from "@/lib/i18n";
 
 const TABS: { href: string; key: DictKey; Icon: typeof IconStore; exact?: boolean }[] = [
@@ -50,7 +51,10 @@ export function RetailerShell({ retailerName, children }: { retailerName: string
           <BrandMark />
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate text-[15px] font-semibold">{retailerName}</p>
-            <p className="text-xs text-ink-3">{t("appName")}</p>
+            <p className="text-xs text-ink-3">
+              {BRAND}
+              {process.env.NEXT_PUBLIC_DEMO_HINTS === "true" && <span className="ml-2 rounded bg-turmeric-soft px-1.5 py-0.5 text-[10px] font-bold text-amber">SAMPLE DATA</span>}
+            </p>
           </div>
           <button
             type="button"
