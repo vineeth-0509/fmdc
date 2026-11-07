@@ -11,8 +11,8 @@ export const PERIODS = [
   { key: "6m", label: "6 months", days: 0, months: 6 },
 ] as const;
 
-export type PeriodKey = (typeof PERIODS)[number]["key"] | "custom";
-export const PERIOD_KEYS = [...PERIODS.map((p) => p.key), "custom"] as [PeriodKey, ...PeriodKey[]];
+export const PERIOD_KEYS = ["1d", "2d", "7d", "1m", "3m", "6m", "custom"] as const;
+export type PeriodKey = (typeof PERIOD_KEYS)[number];
 
 export const MAX_CUSTOM_DAYS = 400;
 
